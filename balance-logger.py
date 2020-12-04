@@ -6,7 +6,7 @@ import requests
 if len(argv) != 3:
   exit("Usage: balance-logger.py VALIDATOR_ID UPDATE_INTERVAL")
 
-URL = "http://127.0.0.1:5052/eth/v1/beacon/states/head/validators/" + argv[1]
+URL = "http://127.0.0.1:5052/eth/v1/beacon/states/finalized/validators/" + argv[1]
 UPDATE_INTERVAL = int(argv[2])
 balance_guage = Gauge('eth_validator_balance', 'Validator balance, in ETH')
 start_http_server(9010)
