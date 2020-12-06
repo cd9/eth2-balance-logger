@@ -1,18 +1,16 @@
-from sys import argv, exit
 from prometheus_client import start_http_server, Gauge
 from time import sleep
-import requests
+from requests import get
 
-if len(argv) != 3:
-  exit("Usage: balance-logger.py VALIDATOR_ID UPDATE_INTERVAL")
+VALIDATOR_INDICES = [1,2,3] #REPLACE THIS WITH YOUR VALIDATOR INDEXES
+URL_PREFIX = "http://127.0.0.1:5052/eth/v1/beacon/states/finalized/validators/"
+UPDATE_INTERVAL = 15
 
-URL = "http://127.0.0.1:5052/eth/v1/beacon/states/finalized/validators/" + argv[1]
-UPDATE_INTERVAL = int(argv[2])
-balance_guage = Gauge('eth_validator_balance', 'Validator balance, in ETH')
+balance_guage = Gauge('validator_balance', 'Validator balance, in ETH', ['index'])
 start_http_server(9010)
 
 while (True):
-  response = requests.get(URL)
-  if response.ok:
-    balance_guage.set(float(response.json()["data"]["balance"])/10**9)
+  for validator_index in VALIDATOR_INDICES:
+    balance = get(URL_PREFIX+str(validator_index)).json()["data"]["balance"]
+    balance_guage.labels(index=validator_index).set(float(balance)/10**9)
   sleep(UPDATE_INTERVAL)
